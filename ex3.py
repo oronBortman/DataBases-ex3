@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 
 
 # Class to represent an element
@@ -8,20 +8,21 @@ class Element:
         self.trans_act = element_str[0]
         start_dest = element_str.find("(") + len("(")
         end_dest = element_str.find(")")
-        self.tran_scheme = element_str[start_dest:end_dest]
+        self.trans_scheme = element_str[start_dest:end_dest]
 
 
 # Class to represent a graph
 class Graph:
     def __init__(self):
-        self.graph = defaultdict(list)  # dictionary containing adjacency List
-        self.V = None  # No. of vertices
+        self.graph = defaultdict(set)  # dictionary containing adjacency List
+        self.V = set()  # verticals
 
     # function to add an edge to graph
     def add_edge(self, u, v):
-        self.graph[u].append(v)
+        self.graph[u].add(v)
 
-
+    def add_vert(self, v):
+        self.V.add(v)
 
 
 '''
@@ -39,8 +40,10 @@ def check_for_vert_and_add_to_graph(source_elem, tran_list, index_to_look_from, 
     tran_list = tran_list[index_to_look_from:]
     for dest_elem in tran_list:
         if source_elem.trans_act == 'R' and dest_elem.trans_act == 'W' or dest_elem.trans_act == 'W':
-            if source_elem.tans_scheme == dest_elem.tans_scheme and source_elem.trans_num != dest_elem.tran_num_dest:
-                g.add_edge(source_elem.trans_num, dest_elem.tran_num_dest)
+            if source_elem.trans_scheme == dest_elem.trans_scheme and source_elem.trans_num != dest_elem.trans_num:
+                g.add_edge(source_elem.trans_num, dest_elem.trans_num) #Adding edge
+                g.add_vert(source_elem.trans_num) # add source transaction as vert
+                g.add_vert(dest_elem.trans_num) # add destination transaction as vert
 
 
 def build_graph(elem_list, g):
@@ -50,13 +53,46 @@ def build_graph(elem_list, g):
         index = index + 1
 
 
-#def topological_sort(g):
+def topological_sort(g):
+    queue = deque([])
+    in_degree = {}
+
+    for v in g.V:
+        in_degree[v] = 0
+
+    for s_vert, d_vert_list in g.graph.items():
+        for d_vert in d_vert_list:
+            in_degree[d_vert] = in_degree[d_vert] + 1
+
+    for v in g.V:
+        if in_degree[v] == 0:
+            queue.append(v)
+
+    while len(queue) != 0:
+        u = queue.pop()
+
+        for v in g.graph[u]:
+            in_degree[v] = in_degree[v] - 1
+            if in_degree[v] == 0:
+                queue.append(v)
+
+        if len(queue) == 0:
+            print("T{0}".format(u), end='')
+        else:
+            print("T{0}->".format(u), end='')
+
+    for v in g.V:
+        if in_degree[v] != 0:
+            print("No")
+            return
 
 
 graph = Graph()
-transaction = "R2(A);R1(B);W2(A);R2(B);R3(A);W1(B);W3(A);W2(B)"
+#transaction = "R2(A);R1(B);W2(A);R2(B);R3(A);W1(B);W3(A);W2(B)" # Bad
+transaction = "R2ׂׂ(A);R1(B);W2(A);R3(A);W1(B);W3(A);R2(B);W2(B)" # Good
 transaction_list = transaction.split(";")
 element_list = []
 for t in transaction_list:
-    element_list.add(Element(t))
+    element_list.append(Element(t))
 build_graph(element_list, graph)
+topological_sort(graph)
