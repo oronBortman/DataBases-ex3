@@ -88,8 +88,12 @@ def topological_sort(g):
 
 
 graph = Graph()
-#transaction = "R2(A);R1(B);W2(A);R2(B);R3(A);W1(B);W3(A);W2(B)" # Bad
-transaction = "R2ׂׂ(A);R1(B);W2(A);R3(A);W1(B);W3(A);R2(B);W2(B)" # Good
+#transaction = "R2(A);R1(B);W2(A);R2(B);R3(A);W1(B);W3(A);W2(B)" # Cycle
+#transaction = "R2ׂׂ(A);R1(B);W2(A);R3(A);W1(B);W3(A);R2(B);W2(B)" # T1->T2->T3
+transaction = "R5(A);W5(C);W5(B);R5(B);W4(C);R4(A);R4(B);W4(A);W3(A);W3(B);W3(C);R3(C);R2(A);W2(A);W2(B);R2(B);R1(A);W1(A);R1(A)" #T5->T4->T3->T2->T1
+transaction = "R1(A);W3(B);R1(A);W1(A);W3(A);W3(C);R3(C);W5(C);R5(A);R4(B);W2(B);W4(C);R4(A);R2(A);R2(B);R4(C)" #T1->T3->T5->T4->T2
+transaction = "R5(A);W4(C);W3(A);R2(A);R1(A);W5(C);R4(A);W3(B);W2(A);W1(A);W5(B);R5(B);R4(B);W4(A);W3(C);R3(C);R1(A)" #Cycle
+transaction = "W4(C);R4(A);R2(A);R1(A);W1(A);W2(A);W2(B);R2(B);R1(A);W3(A);W3(B);W3(C);R3(C);R4(B);W4(A);R5(A);W5(C);W5(B);R5(B)" #Cycle
 transaction_list = transaction.split(";")
 element_list = []
 for t in transaction_list:
